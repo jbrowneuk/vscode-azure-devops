@@ -9,12 +9,16 @@ export class PullRequestsProvider implements vscode.TreeDataProvider<PullRequest
 	private _onDidChangeTreeData: vscode.EventEmitter<PullRequest | undefined> = new vscode.EventEmitter<PullRequest | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PullRequest | undefined> = this._onDidChangeTreeData.event;
 
-	private project = ''; 
-	private url = '';
-	private token = process.env.AZURE_DEVOPS_TOKEN; // e.g "cbdeb34vzyuk5l4gxc4qfczn3lko3avfkfqyb47etahq6axpcqha"; 
+	private project: string; 
+	private url: string;
+	private token: string;
 	private connection: azdev.WebApi;
 
-	constructor(private workspaceRoot: string) {
+	constructor(configuration: vscode.WorkspaceConfiguration) {
+		this.project = configuration.get('projectName');
+		this.url = configuration.get('organizationUrl');
+		this.token = configuration.get('token');
+
 		let authHandler = azdev.getPersonalAccessTokenHandler(this.token);
 		this.connection = new azdev.WebApi(this.url, authHandler);
 	}

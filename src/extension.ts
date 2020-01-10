@@ -4,11 +4,14 @@ import * as vscode from 'vscode';
 
 import { PullRequestsProvider } from './pullRequestsProvider';
 
+const configurationNamespace = 'prMonitor';
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const configuration = vscode.workspace.getConfiguration(configurationNamespace);
 
-	const pullRequestProvider = new PullRequestsProvider(vscode.workspace.rootPath);
+	const pullRequestProvider = new PullRequestsProvider(configuration);
 	vscode.window.registerTreeDataProvider('pullRequests', pullRequestProvider);
 	vscode.commands.registerCommand('pullRequests.refresh', () => pullRequestProvider.refresh());
 }

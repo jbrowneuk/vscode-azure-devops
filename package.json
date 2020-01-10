@@ -50,6 +50,29 @@
 					"group": "navigation"
 				}
 			]
+		},
+		"configuration": {
+			"title": "Azure Devops Pull Request Monitor",
+			"properties": {
+				"prMonitor.token": {
+					"title": "Access token",
+					"type": "string",
+					"markdownDescription": "Azure DevOps access token. This will be stored in the settings file and should *never* be committed to source control."
+				},
+				"prMonitor.organizationUrl": {
+					"title": "Organization URL",
+					"type": "string",
+					"description": "The URL to your Azure Devops organization.",
+					"examples": [
+						"https://dev.azure.com/my-organization"
+					]
+				},
+				"prMonitor.projectName": {
+					"title": "Project Name",
+					"type": "string",
+					"description": "The Azure DevOps project to fetch Pull Requests from."
+				}
+			}
 		}
 	},
 	"scripts": {
