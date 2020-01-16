@@ -5,18 +5,40 @@
 
 // The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-// import * as vscode from 'vscode';
-// import * as myExtension from '../extension';
+import * as sinon from 'sinon';
+import * as azdev from 'azure-devops-node-api';
+import { PullRequestsProvider } from '../pullRequestsProvider';
 
 // Defines a Mocha test suite to group tests of similar kind together
-suite("Extension Tests", function () {
+describe('Pull Requests Provider', function() {
+    let sandbox: sinon.SinonSandbox;
+    let getPatStub: sinon.SinonStub;
+    let webApiMock: sinon.SinonStubbedInstance<azdev.WebApi>;
 
-    // Defines a Mocha unit test
-    test("Something 1", function() {
-        assert.equal(-1, [1, 2, 3].indexOf(5));
-        assert.equal(-1, [1, 2, 3].indexOf(0));
+    beforeEach(function() {
+        sandbox = sinon.createSandbox();
+
+        getPatStub = sandbox.stub(azdev, 'getPersonalAccessTokenHandler');
+        webApiMock = sandbox.createStubInstance(azdev.WebApi, {});
+    });
+
+    afterEach(function() {
+        // Reset sinon sandbox to prevent memory leaks
+        // https://sinonjs.org/releases/v8.0.4/general-setup/
+        sandbox.restore();
+    });
+
+    it('should initialize connection', function() {
+        const mockConnectionParams = {
+            organizationUrl: 'https://mock',
+            projectName: 'mock-project',
+            token: 'mock-token'
+        };
+
+        const pullRequestsProvider = new PullRequestsProvider();
+        pullRequestsProvider.initialiseConnection(mockConnectionParams);
+
+        assert(getPatStub.called);
+        assert.equal(webApiMock.serverUrl, mockConnectionParams.organizationUrl);
     });
 });
