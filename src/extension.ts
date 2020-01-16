@@ -1,17 +1,18 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { ApiWrapper } from './apiWrapper';
 
-import { PullRequestsProvider } from './pullRequestsProvider';
+const apiWrapper = new ApiWrapper();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	apiWrapper.activate();
 
-	const pullRequestProvider = new PullRequestsProvider(vscode.workspace.rootPath);
-	vscode.window.registerTreeDataProvider('pullRequests', pullRequestProvider);
-	vscode.commands.registerCommand('pullRequests.refresh', () => pullRequestProvider.refresh());
+	vscode.window.registerTreeDataProvider('pullRequests', apiWrapper.pullRequestProvider);
+	vscode.commands.registerCommand('pullRequests.refresh', () => apiWrapper.pullRequestProvider.refresh());
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	apiWrapper.deactivate();
+}

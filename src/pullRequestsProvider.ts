@@ -3,20 +3,21 @@ import * as path from 'path';
 import * as azdev from "azure-devops-node-api";
 import * as GitApi from "azure-devops-node-api/GitApi";
 import * as GitInterfaces from "azure-devops-node-api/interfaces/GitInterfaces";
+import { ConnectionParams } from './model/connectionParams';
 
 export class PullRequestsProvider implements vscode.TreeDataProvider<PullRequest> {
 
 	private _onDidChangeTreeData: vscode.EventEmitter<PullRequest | undefined> = new vscode.EventEmitter<PullRequest | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PullRequest | undefined> = this._onDidChangeTreeData.event;
 
-	private project = ''; 
-	private url = '';
-	private token = process.env.AZURE_DEVOPS_TOKEN; // e.g "cbdeb34vzyuk5l4gxc4qfczn3lko3avfkfqyb47etahq6axpcqha"; 
+	private configuration: ConnectionParams;
 	private connection: azdev.WebApi;
 
-	constructor(private workspaceRoot: string) {
-		let authHandler = azdev.getPersonalAccessTokenHandler(this.token);
-		this.connection = new azdev.WebApi(this.url, authHandler);
+	initialiseConnection(configuration: ConnectionParams): void {
+		this.configuration = configuration;
+
+		let authHandler = azdev.getPersonalAccessTokenHandler(configuration.token);
+		this.connection = new azdev.WebApi(configuration.organizationUrl, authHandler);
 	}
 
 	refresh(): void {
@@ -30,9 +31,9 @@ export class PullRequestsProvider implements vscode.TreeDataProvider<PullRequest
 	getChildren(element?: PullRequest): Thenable<PullRequest[]> {
 		if (element) {
 			return Promise.resolve([]);
-		} else {
-			return this.getPullRequests();
 		}
+
+		return this.getPullRequests();
 	}
 
 	/**
@@ -41,7 +42,7 @@ export class PullRequestsProvider implements vscode.TreeDataProvider<PullRequest
 	private async getPullRequests() {
 		var prs: PullRequest[] = [];
 		let gitApiObject: GitApi.IGitApi = await this.connection.getGitApi();
-		const pullRequests = await gitApiObject.getPullRequestsByProject(this.project, undefined);
+		const pullRequests = await gitApiObject.getPullRequestsByProject(this.configuration.projectName, undefined);
 		for (var pullRequest of pullRequests) {
 			const approved = this.isApproved(pullRequest);
 			if (!approved && pullRequest.status === GitInterfaces.PullRequestStatus.Active) {
